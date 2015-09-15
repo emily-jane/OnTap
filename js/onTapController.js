@@ -1,22 +1,31 @@
-onTapModule.controller('OnTapController', [function() {
+onTapModule.controller('OnTapController', ['$resource', '$http', function($resource, $http) {
 
   var self = this;
 
   self.doSearch = function() {
-    self.searchResult = {
+    var timestamp = new Date().getTime();
+    var method = 'GET';
+    var url = 'http://api.yelp.com/v2/search';
+    var params =    {
+      'callback': 'angular.callbacks._0',
+      'oauth_consumer_key': consumer_key,
+      'oauth_token': token,
+      'oauth_signature_method': signature_method,
+      'oauth_timestamp': timestamp,
+      'oauth_nonce': nonce,
+      'location': self.searchTerm,
+      'cc': 'GB',
+      'category_filter': 'pubs'
+      }
+    var consumerSecret = consumer_secret;
+    var tokenSecret = token_secret;
+    var signature = oauthSignature.generate(method, url, params, consumerSecret, tokenSecret, { encodeSignature: false});
+    params['oauth_signature'] = signature;
 
-      "pubs": [
-        {'name': 'Culpeper',
-        'postcode': 'E1 6LT',
-        'stars': '4.5',
-        'pounds': '££'},
-        {'name': 'Pride of Spitalfields',
-        'postcode': 'E1 6AA',
-        'stars': '3.5',
-        'pounds': '£'},
-      ]
-
-    };
+    $http.jsonp(url, {params: params}).success(function(data) {
+        self.searchResult = data;
+        console.log(data);
+    });
   };
 
 }]);
