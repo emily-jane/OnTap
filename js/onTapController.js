@@ -1,13 +1,14 @@
 onTapModule.controller('OnTapController', ['$resource', '$http', function($resource, $http) {
-
+  var index = 0;
   var self = this;
 
   self.doSearch = function() {
+
     var timestamp = new Date().getTime();
     var method = 'GET';
-    var url = 'http://api.yelp.com/v2/search';
+    var url = 'http://api.yelp.com/v2/search?';
     var params =    {
-      'callback': 'angular.callbacks._0',
+      'callback': 'angular.callbacks._' + index,
       'oauth_consumer_key': consumer_key,
       'oauth_token': token,
       'oauth_signature_method': signature_method,
@@ -21,11 +22,11 @@ onTapModule.controller('OnTapController', ['$resource', '$http', function($resou
     var tokenSecret = token_secret;
     var signature = oauthSignature.generate(method, url, params, consumerSecret, tokenSecret, { encodeSignature: false});
     params['oauth_signature'] = signature;
-
-    $http.jsonp(url, {params: params}).success(function(data) {
-        self.searchResult = data;
+    $http.jsonp(url, { params: params }).then(function(data) {
+        self.searchResult = data.data;
         console.log(data);
-    });
+    }, function(response) { console.log(response) })
+    index ++;
   };
 
 }]);
